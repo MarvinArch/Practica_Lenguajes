@@ -5,6 +5,11 @@
  */
 package identificador;
 
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.OutputStreamWriter;
 import java.util.StringTokenizer;
 import javax.swing.JOptionPane;
 
@@ -19,6 +24,8 @@ public class IdentificadorVentana extends javax.swing.JFrame {
      */
     
     private String[] cadenafinal;
+    File ruta = new File("Aiourssu.txt");
+    
     public IdentificadorVentana() {
         initComponents();
     }
@@ -41,6 +48,11 @@ public class IdentificadorVentana extends javax.swing.JFrame {
         jLabel4 = new javax.swing.JLabel();
         jLabel5 = new javax.swing.JLabel();
         jLabel6 = new javax.swing.JLabel();
+        LabelID = new javax.swing.JLabel();
+        LabelEntero = new javax.swing.JLabel();
+        LabelDecimal = new javax.swing.JLabel();
+        LabelSimbolo = new javax.swing.JLabel();
+        LabelError = new javax.swing.JLabel();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
 
@@ -88,12 +100,19 @@ public class IdentificadorVentana extends javax.swing.JFrame {
             .addGroup(jPanel1Layout.createSequentialGroup()
                 .addGap(21, 21, 21)
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(jLabel2)
                     .addComponent(jLabel6)
                     .addComponent(jLabel5)
                     .addComponent(jLabel4)
-                    .addComponent(jLabel3)
-                    .addComponent(jLabel2))
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                    .addComponent(jLabel3))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(LabelID)
+                    .addComponent(LabelEntero)
+                    .addComponent(LabelDecimal)
+                    .addComponent(LabelSimbolo)
+                    .addComponent(LabelError))
+                .addGap(96, 96, 96))
         );
         jPanel1Layout.setVerticalGroup(
             jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -105,15 +124,25 @@ public class IdentificadorVentana extends javax.swing.JFrame {
                 .addGap(18, 18, 18)
                 .addComponent(jButton1)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 25, Short.MAX_VALUE)
-                .addComponent(jLabel2)
+                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(jLabel2)
+                    .addComponent(LabelID))
                 .addGap(18, 18, 18)
-                .addComponent(jLabel3)
+                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(jLabel3)
+                    .addComponent(LabelEntero))
                 .addGap(18, 18, 18)
-                .addComponent(jLabel4)
+                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(jLabel4)
+                    .addComponent(LabelDecimal))
                 .addGap(18, 18, 18)
-                .addComponent(jLabel5)
+                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(jLabel5)
+                    .addComponent(LabelSimbolo))
                 .addGap(18, 18, 18)
-                .addComponent(jLabel6)
+                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(jLabel6)
+                    .addComponent(LabelError))
                 .addContainerGap())
         );
 
@@ -143,7 +172,20 @@ public class IdentificadorVentana extends javax.swing.JFrame {
 
     private void jButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton1ActionPerformed
         CadenaLeida(jTextField1.getText());
-        JOptionPane.showMessageDialog(this, jTextField1.getText());
+        if (!jTextField1.getText().equalsIgnoreCase("")) {
+                try {
+                    BufferedWriter pw = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(ruta,true), "utf-8"));
+
+                    pw.write(jTextField1.getText()+"\n");
+            
+                    pw.close();
+                    
+                } catch (IOException ex) {
+                System.out.println(ex.getMessage());
+                }
+            }else{
+            JOptionPane.showMessageDialog(this, "Casilla Vacia");
+            }
     }//GEN-LAST:event_jButton1ActionPerformed
     
     public void CadenaLeida(String cadena){
@@ -152,18 +194,49 @@ public class IdentificadorVentana extends javax.swing.JFrame {
         cadenafinal = new String[conta];
         for (int i = 0; i < conta; i++) {
             cadenafinal[i]=token.nextToken();
-            System.out.println(""+ cadenafinal[i]);
+            AnalizarToken(cadenafinal[i]);
         }
-        
-        
     }
     
+    public void AnalizarToken(String palabra){
+        char[] arreglo = palabra.toCharArray();
+        System.out.println(""+Character.getNumericValue(arreglo[0]));
+        if (Character.getNumericValue(arreglo[0])<10) {
+            DiferenciaDecimal(palabra);
+        }else if (Character.getNumericValue(arreglo[0])>=10 && Character.getNumericValue(arreglo[0])<36) {
+            LabelID.setText(palabra);
+        }
+    }
+    
+    public void DiferenciaDecimal(String Palabra){
+        char[] arreglo = Palabra.toCharArray();
+        boolean entero=true;
+        boolean error = false;
+        for (int i = 0; i < Palabra.length(); i++) {
+            if (Character.getNumericValue(arreglo[i])>=10) {
+                LabelError.setText(Palabra);
+                error = true;
+            }else if(Character.getNumericValue(arreglo[i])==-1){
+                entero=false;
+            }
+        }
+        if(entero==false && error==false) {
+            LabelDecimal.setText(Palabra);
+        }else if(entero==true && error==false){
+            LabelEntero.setText(Palabra);
+        }
+    }
     /**
      * @param args the command line arguments
      */
    
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.JLabel LabelDecimal;
+    private javax.swing.JLabel LabelEntero;
+    private javax.swing.JLabel LabelError;
+    private javax.swing.JLabel LabelID;
+    private javax.swing.JLabel LabelSimbolo;
     private javax.swing.JButton jButton1;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel2;
